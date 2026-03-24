@@ -259,3 +259,147 @@ Ready for Phase 2: Backend Integration.
 
 **PHASE 1 (UI SYSTEM) IS NOW 100% COMPLETE.**
 Target: Phase 2 — NestJS Backend & API Integration.
+
+---
+
+## HOSPITAL MANAGEMENT SYSTEM
+
+### Overview
+Dhanvantri implements a complete digital hospital workflow system.
+
+### Flow
+Patient → Appointment → OP Record → Doctor
+
+Doctor →
+  Prescription → Pharmacy
+  Test Order → Lab
+
+Lab →
+  Report → Doctor + Patient
+
+Pharmacy →
+  Medicine → Patient
+
+### Modules
+- Patients
+- Doctors
+- Appointments
+- OP Records
+- Pharmacy
+- Lab
+- Ambulance
+- Billing
+
+### Data Relationships
+
+**USERS TABLE (BASE)**
+id (PK) | name | role | phone | email | created_at
+
+**HOSPITAL TABLE**
+id (PK) | name | location | admin_id (FK → users.id)
+
+**DOCTORS TABLE**
+id (PK) | user_id (FK → users.id) | hospital_id (FK) | specialization | experience
+
+**PATIENT TABLE**
+id (PK) | user_id (FK → users.id) | age | gender | blood_group
+
+**APPOINTMENTS**
+id (PK) | patient_id (FK) | doctor_id (FK) | hospital_id (FK) | date | status
+
+**OP RECORD (VISIT RECORD)**
+id (PK) | patient_id | doctor_id | hospital_id | appointment_id | visit_date | notes
+
+**PRESCRIPTIONS**
+id (PK) | op_id (FK) | doctor_id | patient_id | created_at
+
+**PRESCRIPTION ITEMS (MEDICINES)**
+id (PK) | prescription_id (FK) | medicine_name | dosage | duration | instructions
+
+**PHARMACY ORDERS**
+id (PK) | prescription_id (FK) | patient_id | status
+
+**LAB TEST ORDERS**
+id (PK) | op_id (FK) | patient_id | doctor_id | test_name | status
+
+**LAB REPORTS**
+id (PK) | lab_order_id (FK) | report_file | result_summary | uploaded_at
+
+**AMBULANCE**
+id (PK) | patient_id | hospital_id | pickup_location | status
+
+### Frontend Simulation
+- Prescription → auto pharmacy order
+- Test → auto lab order
+- Report → linked to patient
+
+### Dashboard Integration
+- Patient Dashboard
+- Doctor Dashboard
+- Hospital Dashboard
+- Admin Dashboard
+
+### FRONTEND REFINEMENT (FINAL)
+- Hospital dashboard added
+- Admin dashboard completed
+- All buttons mapped to pages
+- No 404 errors
+### FRONTEND DATABASE SIMULATION SYSTEM
+#### Overview
+Dhanvantri uses a frontend-based database simulation system using:
+`localStorage` + Service Layer + Zustand
+
+#### Data Storage
+- users
+- posts
+- reels
+- hospitals
+- appointments
+- prescriptions
+- labReports
+
+#### Asset Management
+Images and videos are stored in:
+- `public/images/social/posts`
+- `public/images/social/reels`
+- `public/images/profiles`
+- `public/images/hospitals`
+
+#### System Behavior
+- Create post → stored in localStorage → visible in feed
+- Create reel → loaded from local assets
+- Signup/Login → stored in users
+- Appointment → stored and linked to user
+- Doctor actions → update pharmacy & lab data
+
+#### Flow Simulation
+- Doctor → Prescription → Pharmacy Order
+- Doctor → Test → Lab Order
+- Lab → Report → Patient + Doctor
+
+#### Advantages
+- No backend required
+- Full working application simulation
+- Easy future API integration
+
+#### Status
+- Phase-1 Frontend Simulation → ACTIVE
+- Backend dependency → NONE
+
+### REAL WORKING SYSTEM (WITHOUT BACKEND)
+Now your app becomes a fully operational prototype!
+
+### DATABASE UPDATE
+- All major tables now include hospital_id
+- Supports multi-hospital architecture
+
+### MOBILE SYSTEM
+- Responsive UI completed
+- Drawer navigation added
+- All features accessible in mobile
+
+### Status
+Phase-1 Extended → Hospital System Added
+Frontend Logic → Fully Connected
+Simulated Backend & DB → Operational
+FULL FRONTEND COMPLETE ✅

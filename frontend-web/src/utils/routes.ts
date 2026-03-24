@@ -1,0 +1,18 @@
+export const ROUTES = {
+  HOME: "/",
+  DASHBOARD: "/dashboard",
+  DOCTORS: "/doctors",
+  HOSPITALS: "/hospitals",
+  APPOINTMENTS: "/appointments",
+  PROFILE: "/profile",
+  LOGIN: "/login",
+  BOOK_APPOINTMENT: "/book-appointment",
+  VIDEO_CONSULTATION: "/video-consultation",
+  POST_CREATE: "/post-create",
+  REEL_CREATE: "/reel-create",
+  STORY_CREATE: "/story-create",
+  NOTIFICATIONS: "/notifications",
+  SEARCH: "/search",
+  DOCTOR_DASHBOARD: "/doctor/dashboard",
+  ADMIN_DASHBOARD: "/admin/dashboard",
+};
