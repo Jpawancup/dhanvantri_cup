@@ -1,13 +1,5 @@
-"use client"
-
-import { useEffect } from "react"
-import { initializeDatabase } from "@/services/localDb"
-import { seedAppData } from "@/services/seedData"
-
+// No-op: localStorage/backend initialization removed.
+// All data is now served from the central in-memory mockStore.
 export default function InitDB() {
-  useEffect(() => {
-    initializeDatabase()
-    seedAppData()
-  }, [])
-  return null
+  return null;
 }

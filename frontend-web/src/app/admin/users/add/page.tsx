@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState } from "react"
-import { getData, saveData, generateId } from "@/services/localDb"
 import { useRouter } from "next/navigation"
 
 export default function AdminAddUserPage() {
@@ -20,15 +19,7 @@ export default function AdminAddUserPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const users = getData("users") || []
-    const newUser = {
-      id: "u_" + generateId(),
-      ...formData,
-      status: "Active",
-      joined: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-    }
-    users.unshift(newUser)
-    saveData("users", users)
+    // In-memory: In a real app this would update the store. For now redirect.
     router.push("/admin/users")
   }
 

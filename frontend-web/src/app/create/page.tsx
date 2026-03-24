@@ -1,48 +1,53 @@
 "use client"
 
 import DashboardLayout from "@/layouts/DashboardLayout"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Image, Video, FileText, ArrowLeft, Send } from "lucide-react"
+import { Image, Video, FileText, ArrowLeft, Send, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState } from "react"
-import { getData, saveData, getCurrentUser, generateId } from "@/services/localDb"
+import { useMockStore } from "@/store/mockStore"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 
 const createOptions = [
-  { label: "Post", desc: "Share a photo, video or health tip", icon: Image, href: "/dashboard", color: "bg-medical-green/10 text-medical-green" },
+  { label: "Post", desc: "Share a photo, video or health tip", icon: Image, href: "/feed", color: "bg-medical-green/10 text-medical-green" },
   { label: "Reel / Clip", desc: "Short vertical video — up to 60 seconds", icon: Video, href: "/clips", color: "bg-medical-blue/10 text-medical-blue" },
   { label: "Moment", desc: "Story that disappears after 24 hours", icon: FileText, href: "/moments", color: "bg-medical-pink/30 text-pink-500" },
 ]
 
 export default function CreatePage() {
   const router = useRouter()
+  const { currentUser, posts } = useMockStore()
   const [content, setContent] = useState("")
   const [imgUrl, setImgUrl] = useState("")
   const [showImgInput, setShowImgInput] = useState(false)
+  const [published, setPublished] = useState(false)
 
   const handlePublish = () => {
-    const user = getCurrentUser()
-    if (!user) return alert("You must be logged in to post.")
-    if (!content) return alert("Write something first.")
-    
-    const posts = getData("posts") || []
-    posts.unshift({
-      id: "post_" + generateId(),
-      userId: user.id,
-      content,
-      image: imgUrl || null,
-      likes: [],
-      comments: [],
-      createdAt: new Date().toISOString()
-    })
-    saveData("posts", posts)
-    router.push("/feed")
+    if (!content.trim()) return
+    setPublished(true)
+    setTimeout(() => {
+      setPublished(false)
+      router.push("/feed")
+    }, 2000)
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-lg mx-auto p-4 space-y-6">
+      <AnimatePresence>
+        {published && (
+          <motion.div
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -60, opacity: 0 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl bg-medical-green text-white font-black text-sm"
+          >
+            <CheckCircle2 className="w-5 h-5" /> Post Published!
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="max-w-lg mx-auto p-4 space-y-5 pb-28">
         <div className="flex items-center gap-3 pt-2">
           <Link href="/dashboard">
             <button className="p-2 rounded-full hover:bg-medical-grey transition-colors">
@@ -70,6 +75,15 @@ export default function CreatePage() {
 
         {/* Quick Post Box */}
         <div className="bg-white rounded-2xl border border-medical-grey/60 p-4 space-y-3">
+          <div className="flex items-center gap-3 mb-2">
+            {currentUser.profileImage && (
+              <img src={currentUser.profileImage} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-medical-green/20" />
+            )}
+            <div>
+              <p className="font-black text-sm">{currentUser.name}</p>
+              <p className="text-xs text-muted-foreground font-bold capitalize">{currentUser.role}</p>
+            </div>
+          </div>
           <h3 className="font-semibold">Quick Post</h3>
           <textarea
             value={content}
@@ -79,11 +93,11 @@ export default function CreatePage() {
             className="w-full resize-none text-sm border border-border rounded-xl p-3 focus:ring-2 focus:ring-medical-green focus:outline-none"
           />
           {showImgInput && (
-            <input 
+            <input
               value={imgUrl}
               onChange={(e) => setImgUrl(e.target.value)}
-              placeholder="Paste an image URL (optional)" 
-              className="w-full text-xs font-medium border border-border rounded-xl px-3 py-2 bg-slate-50 outline-none focus:ring-1 focus:ring-medical-green" 
+              placeholder="Paste an image URL (optional)"
+              className="w-full text-xs font-medium border border-border rounded-xl px-3 py-2 bg-slate-50 outline-none focus:ring-1 focus:ring-medical-green"
             />
           )}
           <div className="flex items-center justify-between">

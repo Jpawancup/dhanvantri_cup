@@ -1,106 +1,235 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Heart, MessageCircle, Share2, MoreVertical, Play, Pause } from "lucide-react"
+import { useState, useRef, useEffect, useCallback } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Heart, MessageCircle, Share2, VolumeX, Volume2, Play, Pause, Bookmark } from "lucide-react"
 
-export default function ReelPlayer() {
-  const [isPlaying, setIsPlaying] = useState(true)
+// 13 real local reels (reel1.mp4 ... reel13.mp4)
+const REELS = Array.from({ length: 13 }, (_, i) => ({
+  id: i + 1,
+  src: `/images/social/reels/reel${i + 1}.mp4`,
+  doctor: ["Dr. Amit Sharma", "Dr. Anjali Desai", "Dr. Raj Patel", "Dr. Sunita Rao", "Dr. Vikram Nair", "Dr. Priya Mehta", "Dr. Suresh Gupta", "Dr. Nidhi Kapoor", "Dr. Arjun Singh", "Dr. Deepa Joshi", "Dr. Rohan Malhotra", "Dr. Kavita Pillai", "Dr. Farhan Sheikh"][i],
+  specialty: ["Cardiologist", "Neurologist", "Orthopedic", "Gynecologist", "Dermatologist", "Pediatrician", "General Physician", "ENT Specialist", "Psychiatrist", "Endocrinologist", "Oncologist", "Ophthalmologist", "Pulmonologist"][i],
+  title: ["5 Signs of Heart Disease", "Sleep & Brain Health", "Posture at Desk", "Hormonal Balance Tips", "Skin Care Myths Debunked", "Child Nutrition Guide", "Fever Management", "Sinus Relief Techniques", "Mental Health Awareness", "Diabetes Management", "Cancer Early Detection", "Eye Exercise Routine", "Breathing Techniques"][i],
+  likes: [45200, 12400, 33100, 28900, 19800, 42100, 8700, 15300, 67800, 23400, 31200, 11900, 27600][i],
+  comments: [831, 412, 211, 378, 156, 523, 94, 203, 1204, 345, 487, 178, 392][i],
+  avatar: `https://i.pravatar.cc/80?img=${i + 10}`,
+}))
+
+interface ReelItemProps {
+  reel: typeof REELS[0]
+  isActive: boolean
+  muted: boolean
+  onMuteToggle: () => void
+}
+
+function ReelItem({ reel, isActive, muted, onMuteToggle }: ReelItemProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(false)
   const [liked, setLiked] = useState(false)
-  const [followed, setFollowed] = useState(false)
-  const [activeReelIndex, setActiveReelIndex] = useState(0)
-  
-  const reels = [
-    { id: 1, title: "Cholesterol Risks", doctor: "Dr. Raj Patel", likes: "45k", comments: "831" },
-    { id: 2, title: "Sugar & Insulin", doctor: "Dr. Anjali Desai", likes: "12k", comments: "412" },
-    { id: 3, title: "Stress Management", doctor: "Dr. Vikram Seth", likes: "33k", comments: "211" },
-  ]
+  const [saved, setSaved] = useState(false)
+  const [likes, setLikes] = useState(reel.likes)
+  const [showHeartBurst, setShowHeartBurst] = useState(false)
+  const lastTap = useRef(0)
 
-  const nextReel = () => setActiveReelIndex((prev) => (prev + 1) % reels.length)
-  const activeReel = reels[activeReelIndex]
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    if (isActive) {
+      video.currentTime = 0
+      video.play().then(() => setPlaying(true)).catch(() => setPlaying(false))
+    } else {
+      video.pause()
+      setPlaying(false)
+    }
+  }, [isActive])
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted
+  }, [muted])
+
+  const togglePlay = () => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) { video.play(); setPlaying(true) }
+    else { video.pause(); setPlaying(false) }
+  }
+
+  const handleDoubleTap = (e: React.MouseEvent) => {
+    const now = Date.now()
+    if (now - lastTap.current < 300) {
+      if (!liked) {
+        setLiked(true)
+        setLikes(l => l + 1)
+        setShowHeartBurst(true)
+        setTimeout(() => setShowHeartBurst(false), 1000)
+      }
+    }
+    lastTap.current = now
+    togglePlay()
+  }
+
+  const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
 
   return (
-    <div className="relative w-full h-[80vh] bg-black rounded-xl overflow-hidden shadow-xl mx-auto flex items-center justify-center">
-      {/* Video Placeholder */}
-      <div 
-        className="w-full h-full object-cover flex items-center justify-center bg-zinc-800"
-        onClick={() => setIsPlaying(!isPlaying)}
-      >
-        <span className="text-zinc-500 font-medium">Reel Video Placeholder</span>
-      </div>
+    <div className="relative w-full h-full bg-black flex-shrink-0 snap-start snap-always">
+      <video
+        ref={videoRef}
+        src={reel.src}
+        className="absolute inset-0 w-full h-full object-cover"
+        loop
+        playsInline
+        muted={muted}
+        preload="metadata"
+      />
 
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: isPlaying ? 0 : 1, scale: isPlaying ? 0.8 : 1 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="bg-black/50 p-4 rounded-full text-white pointer-events-auto cursor-pointer" onClick={() => setIsPlaying(!isPlaying)}>
-            <Play className="w-10 h-10 fill-current" />
-          </div>
-        </motion.div>
-      </div>
+      {/* Gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70 pointer-events-none" />
 
-      <div className="absolute right-4 bottom-24 flex flex-col gap-6 items-center">
-        <button className="flex flex-col items-center gap-1 group" onClick={() => setLiked(!liked)}>
-          <motion.div 
-            whileTap={{ scale: 0.8 }}
-            className="w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center group-hover:bg-black/60 transition-colors"
+      {/* Tap area */}
+      <div className="absolute inset-0 cursor-pointer" onClick={handleDoubleTap} />
+
+      {/* Double-tap heart burst */}
+      <AnimatePresence>
+        {showHeartBurst && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1.4 }}
+            exit={{ opacity: 0, scale: 2 }}
+            transition={{ duration: 0.4 }}
           >
-            <Heart className={`w-6 h-6 transition-all ${liked ? "fill-medical-red text-medical-red scale-110" : "text-white"}`} />
+            <Heart className="w-28 h-28 fill-white text-white drop-shadow-2xl" />
           </motion.div>
-          <span className={`text-xs font-semibold drop-shadow-md transition-colors ${liked ? "text-medical-red" : "text-white"}`}>
-            {activeReel.likes}
-          </span>
+        )}
+      </AnimatePresence>
+
+      {/* Play/pause indicator */}
+      <AnimatePresence>
+        {!playing && isActive && !showHeartBurst && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          >
+            <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center">
+              <Play className="w-8 h-8 text-white fill-current ml-1" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Right action buttons */}
+      <div className="absolute right-3 bottom-28 flex flex-col gap-5 items-center z-10">
+        {/* Like */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setLiked(!liked); setLikes(l => liked ? l - 1 : l + 1) }}
+          className="flex flex-col items-center gap-1"
+        >
+          <motion.div whileTap={{ scale: 0.7 }} className="w-11 h-11 bg-black/30 backdrop-blur rounded-full flex items-center justify-center">
+            <Heart className={`w-6 h-6 transition-all ${liked ? "fill-red-500 text-red-500" : "text-white"}`} />
+          </motion.div>
+          <span className="text-white text-[10px] font-black drop-shadow">{fmt(likes)}</span>
         </button>
 
-        <button className="flex flex-col items-center gap-1 group">
-          <div className="w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center group-hover:bg-black/60 transition-colors">
+        {/* Comment */}
+        <button className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <div className="w-11 h-11 bg-black/30 backdrop-blur rounded-full flex items-center justify-center">
             <MessageCircle className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xs font-semibold text-white drop-shadow-md">{activeReel.comments}</span>
+          <span className="text-white text-[10px] font-black drop-shadow">{fmt(reel.comments)}</span>
         </button>
 
-        <button className="flex flex-col items-center gap-1 group">
-          <div className="w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center group-hover:bg-black/60 transition-colors">
+        {/* Share */}
+        <button className="flex flex-col items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <div className="w-11 h-11 bg-black/30 backdrop-blur rounded-full flex items-center justify-center">
             <Share2 className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xs font-semibold text-white drop-shadow-md">Share</span>
+          <span className="text-white text-[10px] font-black drop-shadow">Share</span>
         </button>
 
-        <button className="w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center mt-2 group-hover:bg-black/60">
-          <MoreVertical className="w-6 h-6 text-white" />
+        {/* Save */}
+        <button onClick={(e) => { e.stopPropagation(); setSaved(!saved) }} className="flex flex-col items-center gap-1">
+          <div className="w-11 h-11 bg-black/30 backdrop-blur rounded-full flex items-center justify-center">
+            <Bookmark className={`w-6 h-6 ${saved ? "fill-white text-white" : "text-white"}`} />
+          </div>
+        </button>
+
+        {/* Mute */}
+        <button onClick={(e) => { e.stopPropagation(); onMuteToggle() }} className="flex flex-col items-center gap-1">
+          <div className="w-11 h-11 bg-black/30 backdrop-blur rounded-full flex items-center justify-center">
+            {muted
+              ? <VolumeX className="w-6 h-6 text-white" />
+              : <Volume2 className="w-6 h-6 text-white" />
+            }
+          </div>
         </button>
       </div>
 
-      <div className="absolute left-4 bottom-8 flex flex-col gap-3 pr-20">
+      {/* Bottom info */}
+      <div className="absolute left-4 bottom-8 right-20 z-10 space-y-2">
         <div className="flex items-center gap-3">
-          <img 
-            src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop"
-            alt="Doctor profile"
-            className="w-10 h-10 rounded-full border-2 border-white object-cover"
-          />
-          <h4 className="font-semibold text-white text-md drop-shadow-md">{activeReel.doctor}</h4>
-          <button 
-            onClick={() => setFollowed(!followed)}
-            className={`px-3 py-0.5 border rounded-md text-xs font-semibold backdrop-blur-md transition-all ${
-              followed 
-                ? "bg-white text-black border-white" 
-                : "bg-white/10 text-white border-white hover:bg-white/30"
-            }`}
-          >
-            {followed ? "Following" : "Follow"}
+          <img src={reel.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-white object-cover" />
+          <div>
+            <p className="text-white font-black text-sm drop-shadow">{reel.doctor}</p>
+            <p className="text-white/70 text-[10px] font-bold uppercase tracking-wider">{reel.specialty}</p>
+          </div>
+          <button className="ml-2 border border-white text-white text-[10px] font-black px-3 py-0.5 rounded-full hover:bg-white hover:text-black transition-all">
+            Follow
           </button>
         </div>
-        <p className="text-white text-sm font-medium drop-shadow-md line-clamp-2">
-          {activeReel.title} – Understanding healthcare through reels. What your test reports don't tell you. Watch till the end. 🏥
+        <p className="text-white text-sm font-medium drop-shadow leading-snug line-clamp-2">
+          {reel.title} — Understanding your health one reel at a time. Swipe up for more. 🏥
         </p>
-        <button 
-          onClick={nextReel}
-          className="text-xs font-bold text-white/60 hover:text-white transition-colors underline underline-offset-4 w-fit"
-        >
-          Next Video ⬇
-        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function ReelPlayer({ startIndex = 0 }: { startIndex?: number }) {
+  const [activeIndex, setActiveIndex] = useState(startIndex)
+  const [muted, setMuted] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const touchStartY = useRef(0)
+
+  const handleScroll = useCallback(() => {
+    const container = containerRef.current
+    if (!container) return
+    const scrolled = container.scrollTop
+    const height = container.clientHeight
+    const idx = Math.round(scrolled / height)
+    setActiveIndex(idx)
+  }, [])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    container.addEventListener("scroll", handleScroll, { passive: true })
+    return () => container.removeEventListener("scroll", handleScroll)
+  }, [handleScroll])
+
+  return (
+    <div className="relative w-full h-full">
+      {/* Scrollable container — full height snap scroll */}
+      <div
+        ref={containerRef}
+        className="h-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+        style={{ scrollSnapType: "y mandatory" }}
+      >
+        {REELS.map((reel, i) => (
+          <div key={reel.id} className="w-full h-full snap-start snap-always flex-shrink-0">
+            <ReelItem
+              reel={reel}
+              isActive={activeIndex === i}
+              muted={muted}
+              onMuteToggle={() => setMuted(m => !m)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Reel counter */}
+      <div className="absolute top-4 right-4 bg-black/40 backdrop-blur text-white text-[10px] font-black px-3 py-1 rounded-full z-20">
+        {activeIndex + 1} / {REELS.length}
       </div>
     </div>
   )

@@ -2,7 +2,7 @@
 
 import DashboardLayout from "@/layouts/DashboardLayout"
 import DoctorCard from "@/components/cards/DoctorCard"
-import { doctors } from "@/services/mockData"
+import { MOCK_DOCTORS as doctors } from "@/store/mockStore"
 import { Search, SlidersHorizontal, MapPin, Star, Stethoscope, Navigation } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"

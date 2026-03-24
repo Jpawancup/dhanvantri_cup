@@ -1,46 +1,52 @@
 "use client"
 
-import DashboardLayout from "@/layouts/DashboardLayout"
-import ReelPlayer from "@/components/social/ReelPlayer"
-import { Heart, Stethoscope, Laugh, Newspaper, Flame, Dumbbell } from "lucide-react"
 import { useState } from "react"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import ReelPlayer from "@/components/social/ReelPlayer"
 
-const categories = [
-  { label: "Health", icon: Heart },
-  { label: "Doctors", icon: Stethoscope },
-  { label: "Fitness", icon: Dumbbell },
-  { label: "Trending", icon: Flame },
-  { label: "News", icon: Newspaper },
-  { label: "Comedy", icon: Laugh },
-]
+const categories = ["All", "Health", "Doctors", "Fitness", "Trending", "News", "Comedy"]
 
 export default function ClipsPage() {
-  const [activeCategory, setActiveCategory] = useState("Health")
+  const [activeCategory, setActiveCategory] = useState("All")
 
   return (
-    <DashboardLayout>
-      <div className="bg-black min-h-screen relative">
-        {/* Category filter bar */}
-        <div className="sticky top-16 z-30 px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide bg-gradient-to-b from-black/90 to-transparent">
+    // Full-screen black reel experience — no layout wrapper needed
+    // We use a standalone fullscreen page for immersive viewing
+    <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-safe-or-4">
+        <div className="flex items-center gap-3 pt-3">
+          <Link href="/dashboard">
+            <button className="w-9 h-9 bg-black/40 backdrop-blur rounded-full flex items-center justify-center">
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+          </Link>
+          <span className="text-white font-black text-lg tracking-tight">Reels</span>
+        </div>
+
+        {/* Category chips */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 ml-4 pb-0">
           {categories.map((c) => (
             <button
-              key={c.label}
-              onClick={() => setActiveCategory(c.label)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold flex-shrink-0 transition-all ${activeCategory === c.label ? "bg-medical-green text-white shadow-lg shadow-medical-green/30" : "bg-white/10 text-white/80 hover:bg-white/20 border border-white/10"}`}
+              key={c}
+              onClick={() => setActiveCategory(c)}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all mt-3 ${
+                activeCategory === c
+                  ? "bg-medical-green text-white shadow-lg"
+                  : "bg-white/10 text-white/60 border border-white/10"
+              }`}
             >
-              <c.icon className="w-3.5 h-3.5" /> {c.label}
+              {c}
             </button>
           ))}
         </div>
-
-        {/* Reel Feed */}
-        <div className="flex flex-col items-center gap-6 px-4 pb-24 pt-2">
-          <ReelPlayer />
-          <ReelPlayer />
-          <ReelPlayer />
-        </div>
       </div>
-    </DashboardLayout>
+
+      {/* Full-screen Reel Player */}
+      <div className="flex-1 w-full">
+        <ReelPlayer />
+      </div>
+    </div>
   )
 }
-

@@ -2,7 +2,7 @@
 
 import DashboardLayout from "@/layouts/DashboardLayout"
 import StoryViewer from "@/components/social/StoryViewer"
-import { stories } from "@/services/mockData"
+import { MOCK_STORIES } from "@/store/mockStore"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -30,15 +30,15 @@ export default function MomentsPage() {
       </div>
 
       {/* Friends' Stories */}
-      <div className="p-4">
+      <div className="p-4 pb-28">
         <h3 className="text-sm font-semibold text-muted-foreground mb-4">Recent Moments</h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 md:gap-4">
-          {[...stories, ...stories].map((s, idx) => (
+          {[...MOCK_STORIES, ...MOCK_STORIES].map((s, idx) => (
             <div key={idx} className="relative cursor-pointer rounded-2xl overflow-hidden aspect-[9/16] bg-medical-grey shadow-sm group active:scale-95 transition-transform duration-200">
               <img src={s.img} alt={s.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute top-2 left-2">
-                <div className="w-8 h-8 rounded-full border-2 border-medical-green overflow-hidden">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full border-2 border-medical-green overflow-hidden">
                   <img src={s.img} alt={s.name} className="w-full h-full object-cover" />
                 </div>
               </div>
